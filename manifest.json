@@ -1,0 +1,326 @@
+{
+  "conversations": [
+    {
+      "title": "1. New Mobile Van Businesses",
+      "category": "business",
+      "path": "business/1. New Mobile Van Businesses",
+      "segments": [
+        {
+          "number": 1,
+          "question": {
+            "file": "questions/seg_1_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_1_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 2,
+          "question": {
+            "file": "questions/seg_2_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_2_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 3,
+          "question": {
+            "file": "questions/seg_3_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_3_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 4,
+          "question": {
+            "file": "questions/seg_4_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_4_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 5,
+          "question": {
+            "file": "questions/seg_5_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_5_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 6,
+          "question": {
+            "file": "questions/seg_6_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_6_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 7,
+          "question": {
+            "file": "questions/seg_7_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_7_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 8,
+          "question": {
+            "file": "questions/seg_8_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_8_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 9,
+          "question": {
+            "file": "questions/seg_9_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_9_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 10,
+          "question": {
+            "file": "questions/seg_10_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_10_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 11,
+          "question": {
+            "file": "questions/seg_11_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_11_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 12,
+          "question": {
+            "file": "questions/seg_12_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_12_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 13,
+          "question": {
+            "file": "questions/seg_13_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_13_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 14,
+          "question": {
+            "file": "questions/seg_14_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_14_english_answer.mp3",
+            "language": "English"
+          }
+        }
+      ]
+    },
+    {
+      "title": "2. Conversation Between a Buyer and a Real Estate Agent",
+      "category": "business",
+      "path": "business/2. Conversation Between a Buyer and a Real Estate Agent",
+      "segments": [
+        {
+          "number": 1,
+          "question": {
+            "file": "questions/seg_1_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_1_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 2,
+          "question": {
+            "file": "questions/seg_2_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_2_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 3,
+          "question": {
+            "file": "questions/seg_3_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_3_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 4,
+          "question": {
+            "file": "questions/seg_4_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_4_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 5,
+          "question": {
+            "file": "questions/seg_5_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_5_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 6,
+          "question": {
+            "file": "questions/seg_6_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_6_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 7,
+          "question": {
+            "file": "questions/seg_7_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_7_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 8,
+          "question": {
+            "file": "questions/seg_8_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_8_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 9,
+          "question": {
+            "file": "questions/seg_9_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_9_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 10,
+          "question": {
+            "file": "questions/seg_10_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_10_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 11,
+          "question": {
+            "file": "questions/seg_11_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_11_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 12,
+          "question": {
+            "file": "questions/seg_12_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_12_english_answer.mp3",
+            "language": "English"
+          }
+        },
+        {
+          "number": 13,
+          "question": {
+            "file": "questions/seg_13_english_question.mp3",
+            "language": "English"
+          },
+          "answer": {
+            "file": "answers/seg_13_malayalam_answer.mp3",
+            "language": "Malayalam"
+          }
+        },
+        {
+          "number": 14,
+          "question": {
+            "file": "questions/seg_14_malayalam_question.mp3",
+            "language": "Malayalam"
+          },
+          "answer": {
+            "file": "answers/seg_14_english_answer.mp3",
+            "language": "English"
+          }
+        }
+      ]
+    }
+  ]
+}
