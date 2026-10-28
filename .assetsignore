@@ -3,3 +3,5 @@
 .nojekyll
 README.md
 build_manifest.py
+wrangler.jsonc
+.wrangler
