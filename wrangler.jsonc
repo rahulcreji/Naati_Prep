@@ -1,9 +1,0 @@
-// Cloudflare Workers settings for the website. "name" must match the Worker's name in the dashboard.
-{
-  "name": "naati-website",
-  "compatibility_date": "2025-10-01",
-  // Serve the files in this folder as the website (.assetsignore lists the ones left out)
-  "assets": {
-    "directory": "."
-  }
-}

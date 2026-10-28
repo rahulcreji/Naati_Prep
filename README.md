@@ -4,10 +4,9 @@ This is the website for naatii
 Practice dialogues for the NAATI English ⇄ Malayalam test. Open a domain and a conversation, play each
 question, interpret it yourself, then click **Show answer** to compare.
 
-Website: https://naati-website.the-language-formula.workers.dev/
+Website: https://naati-prep.the-language-formula.workers.dev/
 
-Hosted on Cloudflare Workers (settings in `wrangler.jsonc`; `.assetsignore` lists the files that are
-not put on the site).
+Hosted on Cloudflare Workers (`.assetsignore` lists the files that are not put on the site).
 
 ## Adding conversations
 
