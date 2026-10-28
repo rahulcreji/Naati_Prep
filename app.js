@@ -137,12 +137,12 @@ function matches(conversation, query) {
 }
 
 function showHome() {
-  document.title = "NAATI CCL Practice – English ⇄ Malayalam";
+  document.title = "NAATI CCL Malayalam Practice – The Language Formula";
   const segmentCount = conversations.reduce((sum, c) => sum + c.segments.length, 0);
 
   const hero = el("section", { class: "hero" },
     el("div", { class: "container" },
-      el("p", { class: "eyebrow" }, "NAATI CCL · Malayalam"),
+      el("p", { class: "eyebrow" }, "The Language Formula · NAATI CCL Malayalam"),
       el("h1", {}, "Practise interpreting with real dialogue segments"),
       el("p", { class: "lead" },
         "Listen to each segment, interpret it into the other language, then compare your version with a model answer."),
@@ -195,7 +195,7 @@ function showHome() {
 }
 
 function showCategory(category) {
-  document.title = domainTitle(category) + " – NAATI CCL Practice";
+  document.title = domainTitle(category) + " – The Language Formula";
   const list = inCategory(category);
   const listArea = el("div", {}, conversationList(list, false));
   const search = searchBox(`Search ${domainTitle(category)}`, (query) => {
@@ -269,7 +269,7 @@ function part(kind, conversation, segment) {
 
 function showConversation(conversation) {
   const { number, title } = parseTitle(conversation.title);
-  document.title = title + " – NAATI CCL Practice";
+  document.title = title + " – The Language Formula";
   const answerParts = [];
   const answerButtons = [];
 
@@ -359,6 +359,8 @@ document.addEventListener("play", (event) => {
 }, true);
 
 window.addEventListener("hashchange", route);
+
+document.getElementById("year").textContent = new Date().getFullYear();
 
 fetch("manifest.json", { cache: "no-cache" })
   .then((response) => response.json())
