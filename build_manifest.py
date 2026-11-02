@@ -2,6 +2,7 @@
 #
 # A conversation is any folder <category>/<conversation name>/ that has questions/ and answers/
 # with files named seg_<n>_<language>_question.mp3 and seg_<n>_<language>_answer.mp3.
+# If the folder also has transcript.json (made by pdf_to_audio_enhance_google.py), the site can show the text.
 #
 # Run this again every time you add or remove a conversation, then commit and push.
 #   python build_manifest.py
@@ -46,12 +47,16 @@ def build():
                 if number in answers:
                     segment["answer"] = {"file": f"answers/{answers[number][0]}", "language": answers[number][1]}
                 segments.append(segment)
-            conversations.append({
+            entry = {
                 "title": conversation.name,
                 "category": category.name,
                 "path": f"{category.name}/{conversation.name}",
                 "segments": segments,
-            })
+            }
+            # The site shows the English/Malayalam text only for dialogues that have a transcript.json
+            if (conversation / "transcript.json").exists():
+                entry["transcript"] = True
+            conversations.append(entry)
 
     with open(ROOT / "manifest.json", "w", encoding="utf-8") as f:
         json.dump({"conversations": conversations}, f, ensure_ascii=False, indent=2)
