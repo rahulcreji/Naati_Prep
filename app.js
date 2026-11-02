@@ -63,7 +63,31 @@ const ICONS = {
 const PLAY_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
 const PAUSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
 
-const SPEEDS = [1, 0.8, 1.2];
+// Playback speeds in the speed menu. The chosen speed applies to every recording and is remembered
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5];
+const SPEED_KEY = "tlf-naati-speed-v1";
+
+function loadSpeed() {
+  try {
+    const saved = Number(localStorage.getItem(SPEED_KEY));
+    return SPEEDS.includes(saved) ? saved : 1;
+  } catch {
+    return 1;
+  }
+}
+
+let playbackSpeed = loadSpeed();
+
+function setSpeed(speed) {
+  playbackSpeed = speed;
+  try {
+    localStorage.setItem(SPEED_KEY, String(speed));
+  } catch {
+    // ignore
+  }
+  for (const menu of document.querySelectorAll("select.speed")) menu.value = String(speed);
+  for (const audio of document.querySelectorAll("audio")) audio.playbackRate = speed;
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // Titles: the folder names come from the PDF names, which are often cut off, in capitals or misspelled.
@@ -198,6 +222,14 @@ function domainColor(category) {
   return DOMAIN_COLORS[category.toLowerCase()] || DEFAULT_COLOR;
 }
 
+// CSS variables for a domain's colour: the colour, a light tint and a border tint (made here as see-through
+// colours, so older browsers without CSS color-mix() show them too)
+function accentStyle(category) {
+  const color = domainColor(category);
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16));
+  return `--accent: ${color}; --accent-soft: rgba(${r}, ${g}, ${b}, 0.12); --accent-line: rgba(${r}, ${g}, ${b}, 0.35)`;
+}
+
 function domainIcon(category, className = "domain-icon") {
   return icon(DOMAIN_ICONS[category.toLowerCase()] || DEFAULT_ICON, className);
 }
@@ -262,7 +294,9 @@ function progressBar(done, total, label) {
 // ---------------------------------------------------------------------------------------------------------
 // Progress: the segments whose answer was revealed, per dialogue, kept in localStorage
 
-const PROGRESS_KEY = "tlf-naati-progress-v1";
+// v2: a segment counts once its question was heard (half of it at least) and its answer revealed. Progress
+// saved under v1, which counted a revealed answer alone, is not used
+const PROGRESS_KEY = "tlf-naati-progress-v2";
 const LAST_KEY = "tlf-naati-last-v1";
 
 function loadProgress() {
@@ -446,9 +480,8 @@ function stepsSection() {
 function domainCard(category) {
   const list = inCategory(category);
   const { done, total } = categoryProgress(list);
-  const color = domainColor(category);
   return el("li", {},
-    el("a", { class: "domain-card", href: link(category), style: `--accent: ${color}` },
+    el("a", { class: "domain-card", href: link(category), style: accentStyle(category) },
       el("div", { class: "domain-banner" },
         domainIcon(category, "domain-icon-large"),
         el("span", { class: "domain-count" }, plural(list.length, "dialogue"))),
@@ -522,7 +555,7 @@ function dialogueList(list, showDomain) {
     const meta = [plural(conversation.segments.length, "segment")];
     if (showDomain) meta.unshift(domainTitle(conversation.category));
     ul.append(el("li", {},
-      el("a", { class: `dialogue-card is-${state}`, href: link(conversation.path), style: `--accent: ${domainColor(conversation.category)}` },
+      el("a", { class: `dialogue-card is-${state}`, href: link(conversation.path), style: accentStyle(conversation.category) },
         el("span", { class: "dialogue-number", title: `Dialogue ${conversation.index}` }, String(conversation.index)),
         el("span", { class: "dialogue-text" },
           el("span", { class: "dialogue-title" }, conversation.display),
@@ -566,7 +599,7 @@ function showCategory(category) {
 
   render();
   app.replaceChildren(
-    el("section", { class: "page-banner", style: `--accent: ${domainColor(category)}` },
+    el("section", { class: "page-banner", style: accentStyle(category) },
       el("div", { class: "container" },
         breadcrumb(["Home", "#"], [domainTitle(category)]),
         el("div", { class: "banner-head" },
@@ -599,8 +632,9 @@ function player(conversation, audio, label) {
   const button = el("button", { class: "play", type: "button" });
   const seek = el("input", { class: "seek", type: "range", min: "0", max: "100", step: "0.1", value: "0", "aria-label": `${label} position` });
   const time = el("span", { class: "time" }, "0:00");
-  let speedIndex = 0;
-  const speed = el("button", { class: "speed", type: "button", title: "Playback speed", "aria-label": "Playback speed 1×" }, "1×");
+  const speed = el("select", { class: "speed", title: "Playback speed", "aria-label": "Playback speed" },
+    ...SPEEDS.map((value) => el("option", { value: String(value) }, `${value}×`)));
+  speed.value = String(playbackSpeed);
 
   function update() {
     const position = sound.duration ? (sound.currentTime / sound.duration) * 100 : 0;
@@ -617,18 +651,14 @@ function player(conversation, audio, label) {
     button.classList.toggle("playing", playing);
   }
 
-  button.addEventListener("click", () => (sound.paused ? sound.play() : sound.pause()));
+  // play() is cancelled (and its promise rejected) if the recording is paused before it starts - that is fine
+  button.addEventListener("click", () => (sound.paused ? sound.play().catch(() => {}) : sound.pause()));
   seek.addEventListener("input", () => {
     if (sound.duration) sound.currentTime = (seek.value / 100) * sound.duration;
   });
-  speed.addEventListener("click", () => {
-    speedIndex = (speedIndex + 1) % SPEEDS.length;
-    sound.playbackRate = SPEEDS[speedIndex];
-    speed.textContent = `${SPEEDS[speedIndex]}×`;
-    speed.setAttribute("aria-label", `Playback speed ${SPEEDS[speedIndex]}×`);
-  });
+  speed.addEventListener("change", () => setSpeed(Number(speed.value)));
   sound.addEventListener("play", () => {
-    sound.playbackRate = SPEEDS[speedIndex];
+    sound.playbackRate = playbackSpeed;
     setPlaying(true);
   });
   sound.addEventListener("pause", () => setPlaying(false));
@@ -677,9 +707,8 @@ async function showConversation(conversation) {
   rememberLast(conversation);
   document.title = `${conversation.display} – The Language Formula`;
   const siblings = inCategory(conversation.category);
-  const color = domainColor(conversation.category);
   const transcript = await loadTranscript(conversation);
-  if (location.hash !== link(conversation.path)) return; // the reader moved on while it loaded
+  if (currentPath() !== conversation.path) return; // the reader moved on while it loaded
 
   const total = answerCount(conversation);
   const done = new Set(practised(conversation));
@@ -689,19 +718,28 @@ async function showConversation(conversation) {
   const finished = el("div", { class: "finished hidden" });
 
   function refreshProgress() {
-    counter.textContent = `${done.size} of ${total} answers checked`;
+    counter.textContent = `${done.size} of ${total} segments practised`;
+    counter.title = "A segment counts as practised when you have played its question and revealed its answer";
     bar.firstChild.style.width = `${total ? (done.size / total) * 100 : 0}%`;
     finished.classList.toggle("hidden", done.size < total || !total);
+  }
+
+  // A segment counts as practised only when its question was heard (at least half of it) AND its answer was
+  // revealed, in either order - "Show all answers" or a quick click on play alone does not count
+  function checkPractised(item) {
+    if (!item.listened || !item.revealed || done.has(item.number)) return;
+    done.add(item.number);
+    markPractised(conversation, item.number);
+    refreshProgress();
   }
 
   function setAnswerVisible(item, visible) {
     item.part.classList.toggle("hidden", !visible);
     item.button.replaceChildren(icon(visible ? ICONS.eyeOff : ICONS.eye), visible ? "Hide answer" : "Show answer");
     item.button.setAttribute("aria-expanded", String(visible));
-    if (visible && !done.has(item.number)) {
-      done.add(item.number);
-      markPractised(conversation, item.number);
-      refreshProgress();
+    if (visible) {
+      item.revealed = true;
+      checkPractised(item);
     }
   }
 
@@ -711,18 +749,33 @@ async function showConversation(conversation) {
 
   const segments = conversation.segments.map((segment) => {
     const texts = transcript?.segments.get(segment.number);
-    const language = (segment.question || segment.answer).language;
+    // The speaker's language is the question's; without a question, it is the other language than the answer's
+    const language = segment.question
+      ? segment.question.language
+      : (languageCode(segment.answer.language) === "ml" ? "English" : "Malayalam");
     const side = languageCode(language) === "ml" ? "right" : "left";
     const name = speakerNames[language.toLowerCase()];
     const bubble = el("div", { class: "bubble" },
       el("div", { class: "segment-head" },
         el("span", { class: "segment-number" }, String(segment.number)),
         el("span", { class: "segment-title" }, name ? `${name} · ${language} speaker` : `${language} speaker`)));
-    if (segment.question) bubble.append(part("question", conversation, segment, texts?.question?.text));
+    const questionPart = segment.question ? part("question", conversation, segment, texts?.question?.text) : null;
+    if (questionPart) bubble.append(questionPart);
     if (segment.answer) {
       const target = segment.answer.language;
       const answerPart = part("answer", conversation, segment, texts?.answer?.text);
-      const item = { number: segment.number, part: answerPart };
+      // A segment without a question recording only needs its answer revealed
+      const item = { number: segment.number, part: answerPart, listened: !questionPart, revealed: false };
+      const questionAudio = questionPart?.querySelector("audio");
+      const heard = () => {
+        if (item.listened) return;
+        if (questionAudio.ended || (questionAudio.duration && questionAudio.currentTime >= questionAudio.duration / 2)) {
+          item.listened = true;
+          checkPractised(item);
+        }
+      };
+      questionAudio?.addEventListener("timeupdate", heard);
+      questionAudio?.addEventListener("ended", heard);
       item.button = el("button", {
         class: "reveal",
         type: "button",
@@ -771,6 +824,7 @@ async function showConversation(conversation) {
     title: "Start this dialogue again",
     onclick: () => {
       resetProgress(conversation);
+      stopAllAudio();
       showConversation(conversation);
     },
   }, icon(ICONS.reset), "Reset");
@@ -781,7 +835,7 @@ async function showConversation(conversation) {
     icon(ICONS.check, "finished-icon"),
     el("div", {},
       el("h2", {}, "Dialogue complete – well done!"),
-      el("p", {}, "You have checked every model answer. Try the dialogue again from the start, or move on.")),
+      el("p", {}, "You have listened to and checked every segment. Try the dialogue again from the start, or move on.")),
     next ? el("a", { class: "button button-primary", href: link(next.path) }, "Next dialogue", icon(ICONS.chevron)) : null);
 
   const pager = el("nav", { class: "pager", "aria-label": "More dialogues" });
@@ -809,7 +863,7 @@ async function showConversation(conversation) {
 
   refreshProgress();
   app.replaceChildren(
-    el("section", { class: "page-banner compact", style: `--accent: ${color}` },
+    el("section", { class: "page-banner compact", style: accentStyle(conversation.category) },
       el("div", { class: "container narrow" },
         breadcrumb(["Home", "#"], [domainTitle(conversation.category), link(conversation.category)], [conversation.display]),
         el("p", { class: "banner-kicker" },
@@ -824,8 +878,25 @@ async function showConversation(conversation) {
 // ---------------------------------------------------------------------------------------------------------
 // Start
 
+// The page path from the address, e.g. "business/1. New Mobile Van Businesses" - the same whether the link was
+// written with %20 / %2F or with plain spaces and slashes
+function currentPath() {
+  const hash = location.hash.replace(/^#\/?/, "");
+  try {
+    return decodeURIComponent(hash);
+  } catch {
+    return hash;
+  }
+}
+
+// A recording that is removed from the page keeps playing unless it is stopped
+function stopAllAudio() {
+  for (const audio of document.querySelectorAll("audio")) audio.pause();
+}
+
 function route() {
-  const path = decodeURIComponent(location.hash.replace(/^#\/?/, ""));
+  stopAllAudio();
+  const path = currentPath();
   const conversation = conversations.find((c) => c.path === path);
   if (conversation) showConversation(conversation);
   else if (categories().includes(path)) showCategory(path);
