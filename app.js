@@ -292,11 +292,11 @@ function progressBar(done, total, label) {
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Progress: the segments whose answer was revealed, per dialogue, kept in localStorage
+// Progress: the completed segments of each dialogue, kept in localStorage. A segment is completed when its
+// question recording has been played to the end (revealing the answer does not matter)
 
-// v2: a segment counts once its question was heard (half of it at least) and its answer revealed. Progress
-// saved under v1, which counted a revealed answer alone, is not used
-const PROGRESS_KEY = "tlf-naati-progress-v2";
+// v3 because the rule changed: progress saved under v1/v2, which counted revealed answers, is not used
+const PROGRESS_KEY = "tlf-naati-progress-v3";
 const LAST_KEY = "tlf-naati-last-v1";
 
 function loadProgress() {
@@ -319,12 +319,12 @@ function saveProgress() {
 }
 
 function practised(conversation) {
-  const numbers = new Set(conversation.segments.filter((s) => s.answer).map((s) => s.number));
+  const numbers = new Set(conversation.segments.map((s) => s.number));
   return (progress[conversation.path] || []).filter((n) => numbers.has(n));
 }
 
 function answerCount(conversation) {
-  return conversation.segments.filter((s) => s.answer).length;
+  return conversation.segments.length;
 }
 
 function markPractised(conversation, number) {
@@ -357,7 +357,7 @@ function updateProgressPill() {
   const pill = document.getElementById("progress-pill");
   const done = conversations.reduce((sum, c) => sum + practised(c).length, 0);
   pill.classList.toggle("hidden", !done);
-  pill.replaceChildren(icon(ICONS.headphones), `${done} segment${done === 1 ? "" : "s"} practised`);
+  pill.replaceChildren(icon(ICONS.headphones), `${done} segment${done === 1 ? "" : "s"} completed`);
 }
 
 function rememberLast(conversation) {
@@ -609,7 +609,7 @@ function showCategory(category) {
             el("p", {}, `${plural(list.length, "dialogue")} · ${plural(segmentCount(list), "segment")}`))),
         el("div", { class: "banner-progress" },
           progressBar(done, total, `${domainTitle(category)} progress`),
-          el("span", {}, `${done} of ${total} segments practised`)))),
+          el("span", {}, `${done} of ${total} segments completed`)))),
     el("div", { class: "container page" },
       el("div", { class: "toolbar" }, chips, searchBox(`Search ${domainTitle(category)}`, (value) => {
         query = value;
@@ -718,18 +718,18 @@ async function showConversation(conversation) {
   const finished = el("div", { class: "finished hidden" });
 
   function refreshProgress() {
-    counter.textContent = `${done.size} of ${total} segments practised`;
-    counter.title = "A segment counts as practised when you have played its question and revealed its answer";
+    counter.textContent = `${done.size} of ${total} segments completed`;
+    counter.title = "A segment is completed when you have listened to its recording to the end";
     bar.firstChild.style.width = `${total ? (done.size / total) * 100 : 0}%`;
     finished.classList.toggle("hidden", done.size < total || !total);
   }
 
-  // A segment counts as practised only when its question was heard (at least half of it) AND its answer was
-  // revealed, in either order - "Show all answers" or a quick click on play alone does not count
-  function checkPractised(item) {
-    if (!item.listened || !item.revealed || done.has(item.number)) return;
-    done.add(item.number);
-    markPractised(conversation, item.number);
+  // A segment is completed when its question recording has been played to the end - showing the answer
+  // does not count, and neither does starting the recording and stopping it early
+  function complete(number) {
+    if (done.has(number)) return;
+    done.add(number);
+    markPractised(conversation, number);
     refreshProgress();
   }
 
@@ -737,10 +737,6 @@ async function showConversation(conversation) {
     item.part.classList.toggle("hidden", !visible);
     item.button.replaceChildren(icon(visible ? ICONS.eyeOff : ICONS.eye), visible ? "Hide answer" : "Show answer");
     item.button.setAttribute("aria-expanded", String(visible));
-    if (visible) {
-      item.revealed = true;
-      checkPractised(item);
-    }
   }
 
   // The English speaker is shown on the left and the Malayalam speaker on the right, like a chat
@@ -760,22 +756,13 @@ async function showConversation(conversation) {
         el("span", { class: "segment-number" }, String(segment.number)),
         el("span", { class: "segment-title" }, name ? `${name} · ${language} speaker` : `${language} speaker`)));
     const questionPart = segment.question ? part("question", conversation, segment, texts?.question?.text) : null;
+    const answerPart = segment.answer ? part("answer", conversation, segment, texts?.answer?.text) : null;
+    // The segment's recording: its question, or its answer if it has no question
+    (questionPart || answerPart).querySelector("audio").addEventListener("ended", () => complete(segment.number));
     if (questionPart) bubble.append(questionPart);
-    if (segment.answer) {
+    if (answerPart) {
       const target = segment.answer.language;
-      const answerPart = part("answer", conversation, segment, texts?.answer?.text);
-      // A segment without a question recording only needs its answer revealed
-      const item = { number: segment.number, part: answerPart, listened: !questionPart, revealed: false };
-      const questionAudio = questionPart?.querySelector("audio");
-      const heard = () => {
-        if (item.listened) return;
-        if (questionAudio.ended || (questionAudio.duration && questionAudio.currentTime >= questionAudio.duration / 2)) {
-          item.listened = true;
-          checkPractised(item);
-        }
-      };
-      questionAudio?.addEventListener("timeupdate", heard);
-      questionAudio?.addEventListener("ended", heard);
+      const item = { number: segment.number, part: answerPart };
       item.button = el("button", {
         class: "reveal",
         type: "button",
@@ -835,7 +822,7 @@ async function showConversation(conversation) {
     icon(ICONS.check, "finished-icon"),
     el("div", {},
       el("h2", {}, "Dialogue complete – well done!"),
-      el("p", {}, "You have listened to and checked every segment. Try the dialogue again from the start, or move on.")),
+      el("p", {}, "You have listened to every segment. Try the dialogue again from the start, or move on.")),
     next ? el("a", { class: "button button-primary", href: link(next.path) }, "Next dialogue", icon(ICONS.chevron)) : null);
 
   const pager = el("nav", { class: "pager", "aria-label": "More dialogues" });
